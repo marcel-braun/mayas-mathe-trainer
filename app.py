@@ -33,7 +33,7 @@ from mathe.db import (
     user_by_username,
     write_session,
 )
-from mathe.practice import next_task
+from mathe.practice import ROUND_SIZE, next_task, roll_round, round_identity
 from mathe.tasks import MODES, mode_info, public_view, evaluate, skill_label, task_signature
 
 SID_COOKIE = "mathe_sid"
@@ -95,6 +95,33 @@ def remember_task(task: dict, replay: bool) -> None:
     g.sess_dirty = True
 
 
+def round_memory_key(user_id: int, mode: str, grade: int) -> str:
+    return f"{user_id}:{mode}:{grade}"
+
+
+def remember_round(user_id: int, mode: str, grade: int, tasks: list[dict]) -> None:
+    memory = dict(g.sess.get("round_memory") or {})
+    memory[round_memory_key(user_id, mode, grade)] = [round_identity(task) for task in tasks]
+    while len(memory) > 24:
+        memory.pop(next(iter(memory)))
+    g.sess["round_memory"] = memory
+
+
+def previous_round(user_id: int, mode: str, grade: int) -> list[str]:
+    memory = g.sess.get("round_memory") or {}
+    found = memory.get(round_memory_key(user_id, mode, grade)) or []
+    return list(found)
+
+
+def take_queued_task(rnd: dict, mode: str, grade: int) -> dict:
+    queue = list(rnd.get("queue") or [])
+    if queue:
+        task = queue.pop(0)
+        rnd["queue"] = queue
+        return task
+    return draw_task(mode, grade)
+
+
 def draw_task(mode: str, grade: int) -> dict:
     who = learner()
     task, replay = next_task(
@@ -115,6 +142,7 @@ def finish_round(rnd: dict) -> None:
     rnd["active"] = False
     rnd["finished"] = True
     rnd["good"] = good
+    rnd.pop("queue", None)
     if solved == length:
         text = f"Alle {length} Aufgaben geschafft. Toll gemacht!"
         fire = 3
@@ -250,11 +278,16 @@ def valid_password(password: str) -> bool:
     return 3 <= len(password) <= 100
 
 
-def load_play(mode: str, grade: int):
+def load_play(mode: str, grade: int, rnd: dict | None = None):
     task = g.sess.get("task")
     view = g.sess.get("view") or {"state": "open"}
     if not task or task.get("mode") != mode or int(task.get("grade", 0)) != grade:
-        task = draw_task(mode, grade)
+        active = rnd or {}
+        if active.get("active") and active.get("mode") == mode and int(active.get("grade") or 0) == grade:
+            task = take_queued_task(active, mode, grade)
+            g.sess["round"] = active
+        else:
+            task = draw_task(mode, grade)
         view = {"state": "open"}
         g.sess["task"] = task
         g.sess["view"] = view
@@ -498,7 +531,7 @@ def spielen(mode: str):
     if rnd.get("active") and rnd.get("mode") == mode and int(rnd.get("grade") or 0) != grade:
         g.sess.pop("round", None)
         rnd = {}
-    task, view = load_play(mode, grade)
+    task, view = load_play(mode, grade, rnd)
     fire = int(view.pop("fire_pending", 0) or 0)
     spark = int(view.pop("spark_pending", 0) or 0)
     if fire or spark:
@@ -618,8 +651,10 @@ def neu(mode: str):
             finish_round(rnd)
             return redirect(url_for("spielen", mode=mode), code=303)
         rnd["index"] = int(rnd["done"]) + 1
+        task = take_queued_task(rnd, mode, grade)
         g.sess["round"] = rnd
-        g.sess["task"] = draw_task(mode, grade)
+        g.sess["task"] = task
+        remember_task(task, False)
         g.sess["view"] = {"state": "open"}
         g.sess_dirty = True
         return redirect(url_for("spielen", mode=mode), code=303)
@@ -637,32 +672,30 @@ def runde(mode: str):
     info = mode_info(mode)
     if info is None:
         abort(404)
-    try:
-        length = int(request.form.get("length", "0"))
-    except ValueError:
-        length = 0
-    if length not in (5, 10, 15):
-        abort(400)
     grade = current_grade(g.user)
     if grade < info["min_grade"]:
         flash(f"Das übst du ab Klasse {info['min_grade']}.")
         return redirect(url_for("trainer"))
     who = learner()
+    tasks = roll_round(who["id"], mode, grade, previous_round(who["id"], mode, grade), ROUND_SIZE)
+    remember_round(who["id"], mode, grade, tasks)
     g.sess["round"] = {
         "active": True,
         "finished": False,
         "mode": mode,
         "grade": grade,
-        "length": length,
+        "length": ROUND_SIZE,
         "index": 1,
         "done": 0,
         "solved": 0,
         "learner_id": who["id"],
+        "queue": tasks[1:],
     }
     g.sess["streak"] = 0
     g.sess["streak_mode"] = mode
     g.sess["streak_grade"] = grade
-    g.sess["task"] = draw_task(mode, grade)
+    g.sess["task"] = tasks[0]
+    remember_task(tasks[0], False)
     g.sess["view"] = {"state": "open"}
     g.sess_dirty = True
     return redirect(url_for("spielen", mode=mode), code=303)

@@ -206,14 +206,15 @@ a.go.slim { width: auto; margin: 0; min-height: 56px; }
 .modes form, .round-row form { margin: 0; }
 .mode-tile { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .round-row { display: flex; flex-wrap: wrap; gap: 8px; }
-.round-row form { flex: 1 1 5.5rem; }
+.round-row form { flex: 1 1 100%; }
 .round-btn {
   width: 100%;
   min-height: 56px;
   background: var(--sun);
   color: var(--ink);
-  font-size: 1.05rem;
+  font-size: 1.15rem;
 }
+.round-again { text-align: center; margin-top: 14px; }
 .learner-pick { margin: 8px 0 18px; }
 .learner-form select {
   width: 100%;

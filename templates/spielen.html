@@ -12,7 +12,11 @@
   {% if state == 'round' %}
     <h1>Runde geschafft</h1>
     <div class="feedback good" role="status"><p>{{ message }}</p></div>
-    <a class="go" href="{{ url_for('trainer') }}">Zur Übersicht</a>
+    <form method="post" action="{{ url_for('runde', mode=mode) }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button class="go" type="submit">Neue Runde</button>
+    </form>
+    <p class="fine round-again"><a href="{{ url_for('trainer') }}">Zur Übersicht</a></p>
   {% else %}
   {% if streak >= 2 %}<p class="streak">{{ streak }} in Folge</p>{% endif %}
   {% if message %}

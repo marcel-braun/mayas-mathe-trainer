@@ -58,13 +58,10 @@
             </button>
           </form>
           <div class="round-row">
-            {% for length in (5, 10, 15) %}
-              <form method="post" action="{{ url_for('runde', mode=card.id) }}">
-                <input type="hidden" name="csrf" value="{{ csrf }}">
-                <input type="hidden" name="length" value="{{ length }}">
-                <button type="submit" class="round-btn">Runde {{ length }}</button>
-              </form>
-            {% endfor %}
+            <form method="post" action="{{ url_for('runde', mode=card.id) }}">
+              <input type="hidden" name="csrf" value="{{ csrf }}">
+              <button type="submit" class="round-btn">Neue Runde</button>
+            </form>
           </div>
         </div>
       {% else %}

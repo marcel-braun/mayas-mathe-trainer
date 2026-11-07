@@ -42,7 +42,7 @@ Die Klassenwahl 1 bis 4 setzt den Zahlenraum der deutschen Grundschule. Ein Modu
 
 Modi: Rechnen, Multiple Choice, Lückenaufgaben, Uhr, Geld, Größen, Formen und Geometrie, Zahlen ordnen.
 
-Eine Runde hat 5, 10 oder 15 Aufgaben. Dieselbe Aufgabe kommt nicht direkt noch einmal. Am Ende steht eine kurze Auswertung, und bei einer gut gelaufenen Runde ein Feuerwerk.
+Eine Runde hat immer 8 Aufgaben. „Neue Runde“ würfelt einen frischen Satz zur gewählten Klasse und zum gewählten Modus. Dieselbe Aufgabe kommt in der Runde nicht doppelt und nicht noch einmal direkt aus der Runde davor, soweit es genug verschiedene Aufgaben gibt. Am Ende steht eine kurze Auswertung, und bei einer gut gelaufenen Runde ein Feuerwerk.
 
 Falsche Aufgaben werden gespeichert, je Kind, Klasse, Modus und Aufgabentyp. Schwache und frisch falsche Typen kommen im normalen Aufgabenstrom öfter wieder, sichere seltener. Auf der Kinderseite gibt es dafür keine Strafe. Die Verwaltung sieht die Übersicht unter Fortschritt.
 
