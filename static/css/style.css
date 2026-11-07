@@ -293,6 +293,56 @@ a.go.slim { width: auto; margin: 0; min-height: 56px; }
 .stage { display: grid; justify-items: center; margin: 8px 0 4px; }
 .help { text-align: center; }
 
+.coach-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 420px;
+  margin: 4px auto 14px;
+  min-height: 64px;
+  padding: 12px 18px;
+  border-radius: var(--radius);
+  border: 3px solid var(--coral);
+  background: white;
+  color: var(--coral-dark);
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+.coach-toggle:hover { background: #fff4ec; }
+.coach {
+  background: #fff8ea;
+  border: 3px solid var(--line);
+  border-radius: 22px;
+  padding: 16px 16px 18px;
+  margin: 0 0 16px;
+}
+.coach[hidden] { display: none; }
+.coach h2 {
+  margin: 0 0 12px;
+  font-size: clamp(1.45rem, 3.4vw, 1.85rem);
+}
+.coach ol {
+  margin: 8px 0 0;
+  padding-left: 1.35rem;
+  display: grid;
+  gap: 12px;
+  font-size: clamp(1.28rem, 3.6vw, 1.6rem);
+  font-weight: 700;
+  line-height: 1.35;
+}
+.coach li::marker { color: var(--coral); font-weight: 800; }
+.coach-last {
+  background: white;
+  border-radius: 16px;
+  padding: 8px 12px;
+  box-shadow: 0 4px 0 var(--line);
+}
+.coach-figure { display: grid; justify-items: center; margin-bottom: 8px; }
+.nline-scroll { overflow-x: auto; max-width: 100%; }
+.nline text { fill: var(--ink); font-family: Nunito, sans-serif; font-size: 16px; font-weight: 800; }
+.nline text.here { fill: var(--coral); }
+
 .answer-row, .pair {
   display: flex;
   justify-content: center;

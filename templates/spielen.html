@@ -35,6 +35,20 @@
     {% endfor %}
   </h2>
   {% if task.help %}<p class="help">{{ task.help }}</p>{% endif %}
+  {% if task.coach %}
+    <button type="button" class="coach-toggle" id="coach-toggle" aria-expanded="false" aria-controls="rechenhilfe">Zeig mir wie</button>
+    <section id="rechenhilfe" class="coach" hidden aria-labelledby="rechenhilfe-titel">
+      <h2 id="rechenhilfe-titel">{{ task.coach.title }}</h2>
+      {% if task.coach.figure %}
+        <div class="coach-figure">{{ visual(task.coach.figure) }}</div>
+      {% endif %}
+      <ol>
+        {% for line in task.coach.lines %}
+          <li class="{{ 'coach-last' if loop.last else '' }}">{{ line }}</li>
+        {% endfor %}
+      </ol>
+    </section>
+  {% endif %}
 
   {% if state != 'success' %}
     {% if task.input_kind == 'choice' %}

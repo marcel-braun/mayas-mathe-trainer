@@ -72,6 +72,19 @@
   <text x="116" y="24" text-anchor="middle">{{ item.l }} cm</text>
   <text x="198" y="88">{{ item.w }} cm</text>
 </svg>
+{% elif item.type == 'line' %}
+<div class="nline-scroll">
+  <svg class="nline" width="{{ 24 + item.max * 28 }}" height="78" viewBox="0 0 {{ 24 + item.max * 28 }} 78" role="img" aria-label="Zahlenstrahl von 0 bis {{ item.max }}">
+    <line x1="16" y1="26" x2="{{ 16 + item.max * 28 }}" y2="26" class="ruler-line"></line>
+    {% for n in range(item.max + 1) %}
+      <line x1="{{ 16 + n * 28 }}" y1="18" x2="{{ 16 + n * 28 }}" y2="34" class="ruler-line"></line>
+      {% if item.start == n %}
+        <circle cx="{{ 16 + n * 28 }}" cy="10" r="5" class="pin"></circle>
+      {% endif %}
+      <text x="{{ 16 + n * 28 }}" y="58" text-anchor="middle" class="{{ 'here' if item.start == n else '' }}">{{ n }}</text>
+    {% endfor %}
+  </svg>
+</div>
 {% elif item.type == 'column' %}
 <div class="column-wrap">
   <div class="column" role="img" aria-label="Schriftliche Rechnung">

@@ -1593,7 +1593,9 @@ def public_view(task: dict) -> dict:
         step = None
         input_kind = task["input_kind"]
     visual = copy.deepcopy(task["visual"]) if task.get("visual") else None
-    return {
+    from mathe.coach import build_coach
+
+    view = {
         "token": task["token"],
         "title": task.get("title") or "",
         "prompt": prompt,
@@ -1606,6 +1608,8 @@ def public_view(task: dict) -> dict:
         "unit": task.get("unit") or "",
         "prompt_size": "md" if len(prompt) > 24 else "xl",
     }
+    view["coach"] = build_coach(task)
+    return view
 
 
 def _match(expect: dict, form: dict, task: dict) -> tuple[str, str]:
@@ -1768,6 +1772,10 @@ def _visual_text(node) -> list[str]:
 
 def _blob(task: dict, view: dict) -> str:
     parts = [view.get("prompt") or "", view.get("help") or "", view.get("title") or "", task["solution"]]
+    coach = view.get("coach") or {}
+    parts.append(coach.get("title") or "")
+    parts.extend(coach.get("lines") or [])
+    parts.extend(_visual_text(coach.get("figure")))
     parts.extend(_visual_text(view.get("visual")))
     for choice in view.get("choices") or []:
         parts.append(choice.get("label") or "")
@@ -2138,6 +2146,9 @@ def _check_parsers() -> None:
 
 def self_check(samples: int = 30) -> None:
     _check_parsers()
+    from mathe.coach import check_examples
+
+    check_examples()
     for grade in (1, 2, 3, 4):
         for mode, _title, _text, minimum in MODES:
             if grade < minimum:

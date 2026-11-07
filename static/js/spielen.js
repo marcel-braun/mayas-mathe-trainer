@@ -1,4 +1,21 @@
 (function () {
+  var toggle = document.getElementById("coach-toggle");
+  var panel = document.getElementById("rechenhilfe");
+  if (toggle && panel) {
+    toggle.addEventListener("click", function () {
+      var open = panel.hasAttribute("hidden");
+      if (open) {
+        panel.removeAttribute("hidden");
+      } else {
+        panel.setAttribute("hidden", "");
+      }
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) {
+        panel.scrollIntoView({ block: "nearest" });
+      }
+    });
+  }
+
   var keypad = document.querySelector(".keypad");
 
   function field() {
