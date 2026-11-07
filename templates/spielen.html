@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% from "_visual.html" import visual, shape, fraction %}
+{% block title %}{{ mode_title }} · Klasse {{ grade }}{% endblock %}
+{% block content %}
+<article class="play">
+  <p class="eyebrow">
+    <a href="{{ url_for('trainer') }}">Zur Übersicht</a>
+    · Klasse {{ grade }} · {{ mode_title }}
+    {% if in_round %} · Aufgabe {{ round_index }} von {{ round_length }}{% endif %}
+    {% if task and task.step %} · Schritt {{ task.step.n }} von {{ task.step.total }}{% endif %}
+  </p>
+  {% if state == 'round' %}
+    <h1>Runde geschafft</h1>
+    <div class="feedback good" role="status"><p>{{ message }}</p></div>
+    <a class="go" href="{{ url_for('trainer') }}">Zur Übersicht</a>
+  {% else %}
+  {% if streak >= 2 %}<p class="streak">{{ streak }} in Folge</p>{% endif %}
+  {% if message %}
+    <div class="feedback {% if state == 'success' %}good{% elif state == 'step' %}step{% else %}soft{% endif %}" role="status">
+      <p>{{ message }}</p>
+      {% if show_solution %}<p class="solution">{{ solution }}</p>{% endif %}
+    </div>
+  {% endif %}
+  {% if task.title %}<h1>{{ task.title }}</h1>{% endif %}
+  {% if task.visual and task.visual.type != 'order' %}
+    <div class="stage">{{ visual(task.visual) }}</div>
+  {% endif %}
+  <h2 class="prompt {{ task.prompt_size }}">
+    {% for piece in task.prompt.split('□') %}
+      {{ piece }}{% if not loop.last %}<span class="blank">?</span>{% endif %}
+    {% endfor %}
+  </h2>
+  {% if task.help %}<p class="help">{{ task.help }}</p>{% endif %}
+
+  {% if state != 'success' %}
+    {% if task.input_kind == 'choice' %}
+      <form method="post" action="{{ url_for('pruefen', mode=mode) }}">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <input type="hidden" name="token" value="{{ task.token }}">
+        <div class="choice-grid">
+          {% for choice in task.choices %}
+            <button type="submit" name="answer" value="{{ choice.id }}" class="choice" aria-label="{{ choice.aria or choice.label }}">
+              {% if choice.shape %}{{ shape(choice.shape) }}{% endif %}
+              {% if choice.fraction %}{{ fraction(choice.fraction) }}{% endif %}
+              {% if choice.label %}<span>{{ choice.label }}</span>{% endif %}
+            </button>
+          {% endfor %}
+        </div>
+      </form>
+    {% elif task.input_kind == 'order' %}
+      <form method="post" action="{{ url_for('pruefen', mode=mode) }}">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <input type="hidden" name="token" value="{{ task.token }}">
+        <div class="order-pad">
+          {% for item in task.visual.numbers %}
+            <button type="button" class="num-btn" data-append="{{ item.value }}">{{ item.label }}</button>
+          {% endfor %}
+        </div>
+        <label for="order-input">Deine Reihenfolge</label>
+        <input id="order-input" class="answer-input" name="answer" value="{{ previous.answer or '' }}" placeholder="{{ task.placeholder }}" autocomplete="off" inputmode="numeric">
+        <div class="inline-actions">
+          <button type="button" class="text-btn" id="order-undo">Zurück</button>
+          <button type="button" class="text-btn" id="order-clear">Leeren</button>
+        </div>
+        <button class="go" type="submit">{% if state == 'retry' %}Nochmal prüfen{% else %}Prüfen{% endif %}</button>
+      </form>
+    {% elif task.input_kind == 'div' %}
+      <form method="post" action="{{ url_for('pruefen', mode=mode) }}">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <input type="hidden" name="token" value="{{ task.token }}">
+        <div class="pair">
+          <label>Ergebnis
+            <input class="answer-input" name="q" value="{{ previous.q or '' }}" inputmode="numeric" autocomplete="off" autofocus>
+          </label>
+          <label>Rest
+            <input class="answer-input" name="r" value="{{ previous.r or '' }}" inputmode="numeric" autocomplete="off">
+          </label>
+        </div>
+        <div class="keypad" data-euro="0">
+          <button type="button" data-key="1">1</button>
+          <button type="button" data-key="2">2</button>
+          <button type="button" data-key="3">3</button>
+          <button type="button" data-key="4">4</button>
+          <button type="button" data-key="5">5</button>
+          <button type="button" data-key="6">6</button>
+          <button type="button" data-key="7">7</button>
+          <button type="button" data-key="8">8</button>
+          <button type="button" data-key="9">9</button>
+          <span></span>
+          <button type="button" data-key="0">0</button>
+          <button type="button" data-key="back" aria-label="Letzte Ziffer löschen">⌫</button>
+        </div>
+        <button class="go" type="submit">{% if state == 'retry' %}Nochmal prüfen{% else %}Prüfen{% endif %}</button>
+      </form>
+    {% else %}
+      <form method="post" action="{{ url_for('pruefen', mode=mode) }}">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <input type="hidden" name="token" value="{{ task.token }}">
+        <div class="answer-row">
+          <input class="answer-input" name="answer" value="{{ previous.answer or '' }}" placeholder="{{ task.placeholder }}" autocomplete="off" autofocus inputmode="{{ 'decimal' if task.input_kind == 'euro' else 'numeric' }}">
+          {% if task.unit %}<span class="unit">{{ task.unit }}</span>{% endif %}
+        </div>
+        <div class="keypad" data-euro="{{ '1' if task.input_kind == 'euro' else '0' }}">
+          <button type="button" data-key="1">1</button>
+          <button type="button" data-key="2">2</button>
+          <button type="button" data-key="3">3</button>
+          <button type="button" data-key="4">4</button>
+          <button type="button" data-key="5">5</button>
+          <button type="button" data-key="6">6</button>
+          <button type="button" data-key="7">7</button>
+          <button type="button" data-key="8">8</button>
+          <button type="button" data-key="9">9</button>
+          {% if task.input_kind == 'euro' %}
+            <button type="button" data-key=",">,</button>
+          {% else %}
+            <span></span>
+          {% endif %}
+          <button type="button" data-key="0">0</button>
+          <button type="button" data-key="back" aria-label="Letzte Ziffer löschen">⌫</button>
+        </div>
+        <button class="go" type="submit">{% if state == 'retry' %}Nochmal prüfen{% else %}Prüfen{% endif %}</button>
+      </form>
+    {% endif %}
+    {% if in_round %}
+      {% if state == 'retry' %}
+        <form method="post" action="{{ url_for('neu', mode=mode) }}" class="next-form">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <button class="text-btn" type="submit">Weiter</button>
+        </form>
+      {% endif %}
+    {% else %}
+      <form method="post" action="{{ url_for('neu', mode=mode) }}" class="next-form">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="text-btn" type="submit">{% if state == 'retry' %}Nächste Aufgabe{% else %}Andere Aufgabe{% endif %}</button>
+      </form>
+    {% endif %}
+  {% else %}
+    <form method="post" action="{{ url_for('neu', mode=mode) }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button class="go" type="submit">{% if in_round %}Weiter{% else %}Nächste Aufgabe{% endif %}</button>
+    </form>
+  {% endif %}
+  {% endif %}
+</article>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/fireworks.js') }}"></script>
+<script src="{{ url_for('static', filename='js/spielen.js') }}"></script>
+{% endblock %}

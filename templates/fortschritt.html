@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Fortschritt · Mathe-Trainer{% endblock %}
+{% block content %}
+<section class="admin">
+  <h1>Fortschritt</h1>
+  <p class="help">In jeder Zelle stehen richtige und falsche Versuche. Kinder sehen das nicht als Strafe.</p>
+  {% for block in blocks %}
+    <article class="panel progress-card">
+      <h2>{{ block.user.display_name }}</h2>
+      <p>{{ block.user.username }} · {% if block.user.role == 'admin' %}Admin{% else %}Kind{% endif %} · beste Serie {{ block.user.best_streak }}</p>
+      <p><strong>{{ block.total_c }}</strong> richtig · <strong>{{ block.total_w }}</strong> falsch</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Modus</th>
+              {% for grade in (1, 2, 3, 4) %}<th>Klasse {{ grade }}</th>{% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for mode in modes %}
+              <tr>
+                <th>{{ mode.title }}</th>
+                {% for grade in (1, 2, 3, 4) %}
+                  {% set cell = block.grid[grade][mode.id] %}
+                  <td>
+                    {% if cell %}{{ cell.correct }} richtig<br>{{ cell.wrong }} falsch{% else %}–{% endif %}
+                  </td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if block.stats %}
+        <h3>Aufgabentypen</h3>
+        <ul class="skill-list">
+          {% for row in block.stats %}
+            <li>Klasse {{ row.grade }} · {{ row.mode }} · {{ row.skill }}: {{ row.correct }} richtig, {{ row.wrong }} falsch</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% if block.mistakes %}
+        <h3>Zuletzt daneben</h3>
+        <ul class="skill-list">
+          {% for row in block.mistakes %}
+            <li>Klasse {{ row.grade }} · {{ row.mode }} · {{ row.skill }}: {{ row.prompt }}{% if row.open %} · noch offen{% endif %}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </article>
+  {% endfor %}
+</section>
+{% endblock %}

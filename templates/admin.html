@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Kinder · Mathe-Trainer{% endblock %}
+{% block content %}
+<section class="admin">
+  <div class="admin-head">
+    <h1>Kinder</h1>
+    <a class="go slim" href="{{ url_for('kind_neu') }}">Neues Kind</a>
+  </div>
+  <ul class="people">
+    {% for person in people %}
+      <li>
+        <span class="avatar">{{ person.display_name[:1] }}</span>
+        <div>
+          <strong>{{ person.display_name }}</strong>
+          <span>{{ person.username }} · {% if person.role == 'admin' %}Admin{% else %}Kind{% endif %}</span>
+        </div>
+        <a href="{{ url_for('kind_edit', uid=person.id) }}">Bearbeiten</a>
+        {% if person.role == 'kind' %}
+          <a href="{{ url_for('kind_loeschen', uid=person.id) }}">Löschen</a>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

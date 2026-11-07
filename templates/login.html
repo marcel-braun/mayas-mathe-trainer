@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Anmelden · Mathe-Trainer{% endblock %}
+{% block content %}
+<section class="panel narrow login">
+  <h1>Hallo!</h1>
+  <p class="lead">Schön, dass du da bist.</p>
+  <form method="post">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Benutzername
+      <input name="username" autocomplete="username" autocapitalize="off" spellcheck="false" required autofocus>
+    </label>
+    <label>Passwort
+      <input name="password" type="password" autocomplete="current-password" required>
+    </label>
+    {% if error %}
+      <p class="feedback soft" role="status">{{ error }}</p>
+    {% endif %}
+    <button class="go" type="submit">Los geht's</button>
+  </form>
+  <p class="fine">Frag eine erwachsene Person, wenn du Hilfe brauchst.</p>
+</section>
+{% endblock %}

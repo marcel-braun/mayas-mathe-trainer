@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${PGUSER:-mathe}
+      POSTGRES_PASSWORD: ${PGPASSWORD:-mathe}
+      POSTGRES_DB: ${PGDATABASE:-mathe}
+    volumes:
+      - mathe_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGPORT: "5432"
+      PGUSER: ${PGUSER:-mathe}
+      PGPASSWORD: ${PGPASSWORD:-mathe}
+      PGDATABASE: ${PGDATABASE:-mathe}
+      MATHE_HOST: 0.0.0.0
+      MATHE_PORT: "5050"
+      MATHE_SECRET_PATH: /data/secret.key
+    ports:
+      - "127.0.0.1:5050:5050"
+    volumes:
+      - mathe_secret:/data
+    restart: unless-stopped
+
+volumes:
+  mathe_pg:
+  mathe_secret:

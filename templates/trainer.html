@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Übersicht · Mathe-Trainer{% endblock %}
+{% block content %}
+<section class="intro">
+  <h1>Hallo, {{ user.display_name }}!</h1>
+  {% if total %}
+    <p class="cheer">Du hast schon {{ total }} {% if total == 1 %}Aufgabe{% else %}Aufgaben{% endif %} geschafft.</p>
+  {% endif %}
+  {% if learner.best_streak >= 2 and user.role != 'admin' %}
+    <p class="cheer">Beste Serie: {{ learner.best_streak }}</p>
+  {% endif %}
+  {% if user.role == 'admin' %}
+    <p class="cheer">Die Aufgaben zählen für {{ learner.display_name }}.</p>
+  {% endif %}
+</section>
+{% if user.role == 'admin' and kids %}
+<section class="panel learner-pick">
+  <h2>Für welches Kind?</h2>
+  <form method="post" action="{{ url_for('lernen') }}" class="learner-form">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Kind
+      <select name="learner_id">
+        {% for kid in kids %}
+          <option value="{{ kid.id }}" {% if kid.id == learner.id %}selected{% endif %}>{{ kid.display_name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button class="go slim" type="submit">Dieses Kind üben</button>
+  </form>
+</section>
+{% endif %}
+<section>
+  <h2>Welche Klasse übst du?</h2>
+  <div class="grades">
+    {% for number in (1, 2, 3, 4) %}
+      <form method="post" action="{{ url_for('klasse') }}">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <input type="hidden" name="grade" value="{{ number }}">
+        <button type="submit" class="grade {% if number == grade %}on{% endif %}">Klasse {{ number }}</button>
+      </form>
+    {% endfor %}
+  </div>
+</section>
+<section>
+  <h2>Was magst du üben?</h2>
+  <div class="modes">
+    {% for card in cards %}
+      {% if card.open %}
+        <div class="mode-tile">
+          <form method="post" action="{{ url_for('start', mode=card.id) }}">
+            <input type="hidden" name="csrf" value="{{ csrf }}">
+            <button type="submit" class="card">
+              <span class="bubble bubble-{{ card.id }}">{{ icon(card.id) }}</span>
+              <span class="card-title">{{ card.title }}</span>
+              <span class="card-text">{{ card.text }}</span>
+              {% if card.stars %}<span class="stars">{{ card.stars }} {% if card.stars == 1 %}Stern{% else %}Sterne{% endif %}</span>{% endif %}
+            </button>
+          </form>
+          <div class="round-row">
+            {% for length in (5, 10, 15) %}
+              <form method="post" action="{{ url_for('runde', mode=card.id) }}">
+                <input type="hidden" name="csrf" value="{{ csrf }}">
+                <input type="hidden" name="length" value="{{ length }}">
+                <button type="submit" class="round-btn">Runde {{ length }}</button>
+              </form>
+            {% endfor %}
+          </div>
+        </div>
+      {% else %}
+        <div class="card locked">
+          <span class="bubble bubble-{{ card.id }}">{{ icon(card.id) }}</span>
+          <span class="card-title">{{ card.title }}</span>
+          <span class="card-text">Ab Klasse {{ card.min_grade }}</span>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

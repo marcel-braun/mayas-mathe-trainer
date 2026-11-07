@@ -1,0 +1,26 @@
+{% macro icon(name) -%}
+<svg class="icon" viewBox="0 0 64 64" aria-hidden="true">
+  {% if name == 'rechnen' %}
+    <path d="M32 10v44M10 32h44"/>
+  {% elif name == 'wahl' %}
+    <circle cx="18" cy="18" r="7" class="fill"/><circle cx="46" cy="18" r="7"/>
+    <circle cx="18" cy="46" r="7"/><circle cx="46" cy="46" r="7"/>
+  {% elif name == 'luecken' %}
+    <rect x="8" y="16" width="14" height="32" rx="4"/>
+    <rect x="25" y="16" width="14" height="32" rx="4" class="dash"/>
+    <rect x="42" y="16" width="14" height="32" rx="4"/>
+  {% elif name == 'uhr' %}
+    <circle cx="32" cy="32" r="22"/>
+    <path d="M32 18v15l10 6"/>
+  {% elif name == 'geld' %}
+    <circle cx="24" cy="32" r="14"/>
+    <circle cx="40" cy="32" r="14"/>
+  {% elif name == 'groessen' %}
+    <path d="M10 46h44M14 46V28M26 46V18M38 46V34M50 46V24"/>
+  {% elif name == 'formen' %}
+    <polygon points="18,50 32,16 46,50"/>
+  {% else %}
+    <path d="M12 44l12-16 10 10 8-20 10 26"/>
+  {% endif %}
+</svg>
+{%- endmacro %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{% if person %}Bearbeiten{% else %}Neues Kind{% endif %} · Mathe-Trainer{% endblock %}
+{% block content %}
+<section class="panel narrow">
+  <h1>{% if person %}{{ person.display_name }}{% else %}Neues Kind{% endif %}</h1>
+  <form method="post">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Name
+      <input name="display_name" value="{{ display_name }}" maxlength="40" required autocomplete="off">
+    </label>
+    {% if person and person.role == 'admin' %}
+      <p class="help">Der Benutzername admin bleibt.</p>
+    {% else %}
+      <label>Benutzername
+        <input name="username" value="{{ username }}" autocapitalize="off" spellcheck="false" autocomplete="off" required>
+      </label>
+      <p class="help">3 bis 20 kleine Buchstaben oder Zahlen. Damit meldet sich das Kind an.</p>
+    {% endif %}
+    <label>{% if person %}Neues Passwort{% else %}Passwort{% endif %}
+      <input name="password" type="password" autocomplete="new-password" {% if not person %}required{% endif %}>
+    </label>
+    <p class="help">{% if person %}Leer lassen, wenn das Passwort gleich bleibt.{% else %}Mindestens 3 Zeichen.{% endif %}</p>
+    {% if error %}<p class="feedback soft" role="status">{{ error }}</p>{% endif %}
+    <button class="go" type="submit">Speichern</button>
+  </form>
+  <p><a href="{{ url_for('admin') }}">Zurück zur Liste</a></p>
+</section>
+{% endblock %}
